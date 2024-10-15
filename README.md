@@ -92,7 +92,7 @@ pipeline {
         }
         stage ("Git checkout") {
             steps {
-                git branch: 'main', url: 'https://github.com/yeshwanthlm/Prime-Video-Clone-Deployment.git'
+                git branch: 'main', url: 'https://github.com/Pavangowda73/Amazon-prime-clone-deployment.git'
             }
         }
         stage("Sonarqube Analysis "){
@@ -106,7 +106,7 @@ pipeline {
         stage("quality gate"){
            steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token' 
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token' 
                 }
             } 
         }
@@ -117,7 +117,7 @@ pipeline {
         }
         stage('OWASP FS SCAN') {
             steps {
-                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
@@ -134,27 +134,16 @@ pipeline {
         stage ("Tag & Push to DockerHub") {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'docker') {
-                        sh "docker tag amazon-prime amonkincloud/amazon-prime:latest "
-                        sh "docker push amonkincloud/amazon-prime:latest "
+                    withDockerRegistry(credentialsId: 'docker-cred') {
+                        sh "docker tag amazon-prime pavan73384/amazon-prime:latest "
+                        sh "docker push pavan73384/amazon-prime:latest "
                     }
-                }
-            }
-        }
-        stage('Docker Scout Image') {
-            steps {
-                script{
-                   withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){
-                       sh 'docker-scout quickview amonkincloud/amazon-prime:latest'
-                       sh 'docker-scout cves amonkincloud/amazon-prime:latest'
-                       sh 'docker-scout recommendations amonkincloud/amazon-prime:latest'
-                   }
                 }
             }
         }
         stage ("Deploy to Conatiner") {
             steps {
-                sh 'docker run -d --name amazon-prime -p 3000:3000 amonkincloud/amazon-prime:latest'
+                sh 'docker run -d --name amazon-prime -p 3000:3000 pavan73384/amazon-prime:latest'
             }
         }
     }
@@ -177,12 +166,13 @@ pipeline {
                 </body>
                 </html>
             """,
-            to: 'provide_your_Email_id_here',
+            to: 'pavanpavan073384@gmail.com',
             mimeType: 'text/html',
             attachmentsPattern: 'trivy.txt'
         }
     }
 }
+
 
 ```
 **Phase 4: Monitoring**
